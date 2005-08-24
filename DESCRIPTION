@@ -1,0 +1,9 @@
+Package: reb
+Title: Regional Expression Biases
+Version: 1.0
+Author: Kyle A. Furge <kyle.furge@vai.org> and Karl Dykema <karl.dykema@vai.org>
+Depends: R (>= 2.0), Biobase, ideogram
+Description: A set of functions to dentify regional expression biases
+Maintainer: Kyle A. Furge <kyle.furge@vai.org>
+License: VAI, Free for non-commercial, academic use. 
+ZipDat: no

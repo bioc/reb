@@ -1,0 +1,148 @@
+%
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+
+
+% \VignetteIndexEntry{Smoothing of Microarray Data}
+% \VignetteDepends{ideogram}
+% \VignetteKeywords{Expression Analysis}
+%\VignettePackage{reb}
+
+
+
+\documentclass{article}
+\SweaveOpts{eps=false}
+
+
+
+
+\usepackage{hyperref}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+
+\begin{document}
+
+
+\title{reb package - Identification of Regional Expression Biases}
+\author{Karl Dykema}
+\maketitle
+
+\begin{center}
+Laboratory of Computational Biology
+
+Van Andel Research Institute
+
+Grand Rapids, MI 
+\end{center}
+
+
+\section{Overview}
+
+This package contains functions to analyze gene expression data with the aim of identifying regional expression biases.
+To make use of these tools you will need to have Bioconductor installed along with the \Rpackage{ideogram} 
+package. These must be installed in your version of R and when you start R you must load them with the
+\Rfunction{library} command. The \Rpackage{ideogram} package duplicates some of the functionality found in 
+the \Rfunction{plotChr} function of the \Rpackage{geneplotter} library. Please examine both packages and determine which one best suits your analysis requirements.  
+
+This vignette is divided into two parts, basic and advanced reb prediction. Under the "Basic" section  the techniques described are computationally faster, yet more rudimentary.
+Typically, the resolution of this approach is at the level of chromosome arms.
+Under the "Advanced" section, the techniques described are computationally slower but the resolution achieved can be higher. 
+
+
+<<>>=
+library(reb)
+library(ideogram)
+@
+
+\section{Basic Regional Expression Bias (REB) predictions}
+The presence of a regional expression bias often indicates an genomic amplification or deletion has occured. 
+However, other genomic features, such as dramatic changes in gene density, can also lead to expression biases.
+Generally, regional expression biases are identified by isolating a gene expression values from a defined region (such as all the gene expression values mapping to a single chromosome) and applying any number of tests to determine if a bias exists in the expression values.
+Gene expression values are separated into subsets using a \Robject{chromLocation} object.
+The \Robject{chromLocation} object can be built using the \Rfunction{buildChromLocation} function or the \Rfunction{buildChromMap} function.
+The \Rfunction{buildChromLocation} function is typically used to subset the gene expression data based on whole chromosomes, while the \Rfunction{builChromMap} function can be used to subset the gene expression data into regions corresponding to cytogenetic bands.
+For example, buildChromMap can be used to produce a 'chromLocation' object composed of the genes that populate human chromosome 1p and chromosome 1q. 
+
+\Rfunction{summarizeByRegion} is most straightforwardly used to identify regional gene expression biases when a test sample is compared to a biologically meaningful reference sample; data that is typically generated from two-color gene expression data but also can be generated from one-color expression data. 
+The gene expression values from each of these regions are extracted from the \Robject{exprSet} and a summary statistic is computed for each region.  
+A number of simple tests (\Rfunction{t.test},etc) can be used to determine if a genomic region contains a disproportionate number of positive or negative log transformed gene expression ratios. 
+
+If multiple clones map to the same genomic locus the \Robject{aggregate.by.loc} argument can be used to replace multiple overlapping values with a single representative value.
+For example, if 50 copies of the actin gene are on a particular array and actin changes expression under a given condition, it may appear as though a regional expression bias exists as 50 values in a small region change expression.  
+Using the \Robject{aggregate.by.loc} argument can partially correct this situtation.
+
+The mcr.eset is a two-color gene expression \Robject{exprSet} object with cytogenetically complex (MCR) and normal control (MNC) samples that were profiled against a pooled-cell line reference. For specifics, see PMID: 15377468
+
+Please note that we are summarizing this data by chromosome. The function \Rfunction{buildChromMap} can be used to build a \Robject{chromLocation} object where the gene expression values can separated by more refined cytogenetic mapping information, for example by chromosome arm (1p,1q, 2p, 2q, etc) or chromosome band (1p1, 1p2, 1p3).  Hs.arm and Hs.cytoband are data structures that contain chromosome arm and band information for the human genome and are included in this package and ideogram, respectively.
+
+For example: "affy.arms <- buildChromMap("hgu133plus2",Hs.arms)" 
+
+<<>>=
+data(mcr.eset)
+data(ideogramExample)
+
+ref.ix <- grep("MNC",colnames(mcr.eset@exprs))
+mcr.sum <- summarizeByRegion(mcr.eset,vai.chr,ref=ref.ix)
+@
+
+For one-color data (or more complex two-color data), the \Robject{ref} argument in the \Rfunction{summarizeByRegion} can be used to specify which sample(s) should be used as the reference sample(s).
+
+\subsection{Displaying basic reb predictions}
+
+\Rfunction{regmap} or \Rfunction{heatmap} can used to display the results of a \Rfunction{summarizeByRegion} call.
+\Rfunction{regmap} is a simple wrapper around the \Rfunction{image} function to display genome region summary statistics. 
+It includes a scale argument that is a two-element vector which provides a floor and ceiling for the matrix and allows a crude scale bar to be included on the lower potion of the graph. 
+The \Rfunction{regmap} includes a default red-white-blue color scheme called \Robject{.rwb}.
+For other colors consider using the \Rpackage{gtools} \Rfunction{colorpanel} function (ex. "regmap(m,col=colorpanel(30,"blue","white","red"))") or other color schemes (ex. \Rfunction{topo.colors}).
+
+\begin{center}
+<<fig=TRUE, echo=TRUE>>=
+complex.ix <-grep("MCR",colnames(mcr.eset@exprs))
+regmap(mcr.sum[,complex.ix],col=.rwb,scale=c(-3,3))
+@
+
+Notice the diminished expression present in all the samples in the region of chromosome 5. 
+
+\end{center}
+
+\section{Advanced reb prediction}
+
+The function \Rfunction{smoothByRegion} (or \Rfunction{reb}) allows the user to smooth the gene expression data using a subset of smoothing functions. 
+Visualization of the resultant gene expression data can also be a useful way to identify regional expression biases.
+The default smoothing function is a multiple span moving binomial test. Emperically, we have found that this test identifies regional expression biases quite well.
+Other functions such as \Rfunction{supsmu} and \Rfunction{lowess} can also be used.
+
+<<>>=
+mcr.cset <- smoothByRegion(mcr.eset,vai.chr,ref=ref.ix)
+@
+
+The \Rfunction{smoothByRegion} returns an \Robject{exprSet} object that contains the smoothed gene expression data.
+The smoothed gene expression data can be plotted using the \Rpackage{ideogram} package. Please note that in an effort to make this vignette of a reasonable size, we have not used the mideogram function. In this situation it could be used like this: mideogram(mcr.cset@exprs[,complex.ix],vai.chr,method="i",col=.rwb)
+
+Also note that we are using an empirically derived mask of 1.96 when plotting this data. This not only filters out possible noise, but makes the image files smaller for this vignette.
+
+\begin{center}
+<<fig=TRUE, echo=TRUE>>=
+data <- mcr.cset@exprs[,complex.ix]
+data[abs(data) < 1.96] <- NA
+op <- par(no.readonly=TRUE)
+layout(rbind(c(1,2),c(3,4)))
+for(i in c("2","5","11","6")) 
+ideogram(data,vai.chr,method="i",col=.rwb,dlim=c(-4,4),chr=i)
+par(op)
+@
+\end{center}
+
+A closer look at a single chromosome in the samples with complex karyotypes. Notice that the region of diminished expression that is consistant across all of the samples.
+
+\begin{center}
+<<fig=TRUE, echo=TRUE>>=
+ideogram(mcr.cset@exprs[,complex.ix],vai.chr,
+method="m",chr=5,dlim=c(-5,5),type="l",lty=1)
+@
+\end{center}
+\end{document}
+
