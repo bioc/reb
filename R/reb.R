@@ -52,55 +52,72 @@ regmap <- function(m,scale=c(-6,6),na.color=par("bg"),...) {
   par(op)
 }
 
-summarizeByRegion <- function (eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, ...) 
+summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = TRUE, aggrfun = NULL, p.value = 0.005, FUN = t.test, explode=TRUE ,...) 
 {
-  if (length(chrom)==1) {
-    if(chrom=="ALL") {
-      chrom <- names(attr(genome,"chromInfo"))
-      if (is.null(chrom) || is.na(chrom))
-        stop("chromLoc object does not contain any chromInfo\n")
+if (length(chrom) == 1) {
+        if (chrom == "ALL") {
+            chrom2 <- names(attr(genome, "chromInfo"))
+            if (is.null(chrom2) || is.na(chrom2)) 
+                stop("chromLoc object does not contain any chromInfo\n")
+        }else if (chrom == "arms") {
+		chrom2 <- genome@chromLocs$armList
+	}else if (chrom == "bands") {
+		chrom2 <- genome@chromLocs$bandList
+	}else if (chrom == "mb") {
+		chrom2 <- genome@chromLocs$mbList
+	}
     }
-  }
-  chrom <- as.character(chrom)
-  if(!is.null(ref)) {
-    if(!is.numeric(ref))
-      stop("column index's required")
-  }
-  if(!is.null(ref)){
-    cat("Creating ratios...","\n")
-    ref_mean <- apply(eset@exprs[,ref],1,mean,na.rm=TRUE)
-    eset@exprs <- sweep(eset@exprs,1, ref_mean,"-")
-  }
-  if(center)
-    eset@exprs <- scale(eset@exprs,scale=F)
-  blank <- rep(NA, length = length(sampleNames(eset)))
-  sum.statistic <- vector()
-  for (i in chrom) {
-    ##cat("Testing region ", i, "\n")
-    ag.list <- .usedChromExprs(eset@exprs, genome,i, aggrfun)
-    if (is.null(ag.list)) {
-      sum.statistic <- rbind(sum.statistic, blank)
-      next
+    if(is.null(chrom2)) stop(c("\"",chrom,"\""," is not a valid chrom selection."))
+	else chrom <- as.character(chrom2)
+    
+    if (!is.null(ref)) {
+        if (!is.numeric(ref)) 
+            stop("column index's required")
     }
-    ##print(str(ag.list))
-    region.gx <- ag.list$exprs
-    stat <- try(apply(region.gx, 2, FUN, ...))
-    if (inherits(stat, "try-error")) {
-      sum.statistic <- rbind(sum.statistic, blank)
-      next
+    if (!is.null(ref)) {
+        cat("Creating ratios...", "\n")
+        ref_mean <- apply(eset@exprs[, ref], 1, mean, na.rm = TRUE)
+        eset@exprs <- sweep(eset@exprs, 1, ref_mean, "-")
     }
-    if (is.list(stat)) {
-      ps <- unlist(lapply(stat, function(x) x$p.value))
-      stat <- unlist(lapply(stat, function(x) x$statistic))
-      if (!is.na(p.value)) {
-        stat[ps > p.value] <- NA
-      }
+    if (center) 
+        eset@exprs <- scale(eset@exprs, scale = F)
+    blank <- rep(NA, length = length(sampleNames(eset)))
+    sum.statistic <- vector()
+    for (i in chrom) {
+        ag.list <- .usedChromExprs(eset@exprs, genome, i, aggrfun)
+        if (is.null(ag.list)) {
+            sum.statistic <- rbind(sum.statistic, blank)
+            next
+        }
+        region.gx <- ag.list$exprs
+        stat <- try(apply(region.gx, 2, FUN, ...),silent=T)
+        if (inherits(stat, "try-error")) {
+            sum.statistic <- rbind(sum.statistic, blank)
+            next
+        }
+        if (is.list(stat)) {
+            ps <- unlist(lapply(stat, function(x) x$p.value))
+            stat <- unlist(lapply(stat, function(x) x$statistic))
+            if (!is.na(p.value)) {
+                stat[ps > p.value] <- NA
+            }
+        }
+        sum.statistic <- rbind(sum.statistic, stat)
     }
-    sum.statistic <- rbind(sum.statistic, stat)
-  }
-  rownames(sum.statistic) <- as.character(chrom)
-  colnames(sum.statistic) <- sampleNames(eset)
-  return(sum.statistic)
+    rownames(sum.statistic) <- as.character(chrom)
+    colnames(sum.statistic) <- sampleNames(eset)
+    
+    if(explode){
+	nExprs <- eset@exprs
+	nExprs[1:nrow(nExprs),1:ncol(nExprs)] <- NA
+	
+	cat("Exploding summary matrix...", "\n")
+	for(i in chrom) 
+		for(j in 1:ncol(eset@exprs)) nExprs[.usedChromExprs(eset@exprs,genome,i)$geneIDs,j] <- sum.statistic[i,j]
+	return(nExprs)
+    }
+   
+   return(sum.statistic)
 }
 
 cgma <- summarizeByRegion
@@ -176,80 +193,79 @@ naMean <- function(x) {
   mean(x,na.rm=T)
 }
 
-smoothByRegion <- function(eset,genome,chrom="ALL",ref=NULL,center=FALSE,aggrfun=absMax,method=c("movbin","supsmu","lowess"),...) {
-  if (length(chrom)==1) {
-    if(chrom=="ALL") {
-      chrom <- names(attr(genome,"chromInfo"))
-      if (is.null(chrom) || is.na(chrom))
-        stop("chromLoc object does not contain any chromInfo\n")
-    }
-  }
-  chrom <- as.character(chrom)
-  if(!is.null(ref)) {
-    if(!is.numeric(ref))
-      stop("column index's required")
-  }
-  method <- match.arg(method)
-  if(!exists(method))
-    stop(sQuote(method)," is not found")
-  
-  ## ratio creation
-  if(!is.null(ref)){
-    cat("Creating ratios...","\n")
-    ref_mean <- apply(eset@exprs[,ref],1,mean,na.rm=TRUE)
-    eset@exprs <- sweep(eset@exprs,1, ref_mean,"-")
-  }
-  if(center)
-    eset@exprs <- scale(eset@exprs,scale=F)
-  
-  temp.eset <- eset 
-  temp.eset@exprs <- matrix(ncol=ncol(eset@exprs)) ## UG...see below
-  
-  for (chr in chrom) {
-    ##cat("\nScanning chrom ",chr,"\n")
-    uCG <- try(.usedChromExprs(eset@exprs,genome,chr,aggrfun))
-    
-    if(inherits(uCG,"try-error") || is.null(uCG))
-      next;
-    if(ncol(uCG$exprs) != ncol(eset@exprs))
-      next
-    
-    locs <- uCG$locs
-    names(locs) <- uCG$simpleIDs    
-    gx <- uCG$exprs
-    dix <- duplicated(locs)
-    
-    if(sum(dix) & is.null(aggrfun) & method != "movbin") {
-      warning(sum(dix)," duplicate locations found...removing duplicates\n")
-      gx <- gx[!dix,]
-      locs <- locs[!dix]
+smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FALSE, 
+    aggrfun = absMax, method = c("movbin", "supsmu", "lowess"), 
+    ...) 
+{
+    if (length(chrom) == 1) {
+        if (chrom == "ALL") {
+            chrom2 <- names(attr(genome, "chromInfo"))
+            if (is.null(chrom2) || is.na(chrom2)) 
+                stop("chromLoc object does not contain any chromInfo\n")
+        }else if (chrom == "arms") {
+		chrom2 <- genome@chromLocs$armList
+	}else if (chrom == "bands") {
+		chrom2 <- genome@chromLocs$bandList
+	}else if (chrom == "mb") {
+		chrom2 <- genome@chromLocs$mbList
+	}
     }
     
-    r.matrix <- matrix(NA,ncol=ncol(gx),nrow(gx))
-    colnames(r.matrix) <- colnames(gx)
-    rownames(r.matrix) <- names(locs)
-    
-    for(i in c(1:ncol(gx))) {
-      nas <- is.finite(gx[,i])
-      x <- locs[nas]
-      y <- gx[nas,i]
-      sm <- try(switch(method,
-                       movbin=try(movbin(y,...)),
-                       supsmu=try(supsmu(x,y,...)$y),
-                       lowess=try(lowess(x,y,...)$y)),silent=TRUE)
-      if(!inherits(sm,"try-error")) {
-        aa <- try(approx(x,sm,xout=locs),silent=TRUE)
-        if(!inherits(aa,"try-error")) {
-          r.matrix[,i] <- aa$y
+    if(is.null(chrom2)) stop(c("\"",chrom,"\""," is not a valid chrom selection."))
+	else chrom <- as.character(chrom2)
+		
+    if (!is.null(ref)) {
+        if (!is.numeric(ref)) 
+            stop("column index's required")
+    }
+    method <- match.arg(method)
+    if (!exists(method)) 
+        stop(sQuote(method), " is not found")
+    if (!is.null(ref)) {
+        cat("Creating ratios...", "\n")
+        ref_mean <- apply(eset@exprs[, ref], 1, mean, na.rm = TRUE)
+        eset@exprs <- sweep(eset@exprs, 1, ref_mean, "-")
+    }
+    if (center) 
+        eset@exprs <- scale(eset@exprs, scale = F)
+    temp.eset <- eset
+    temp.eset@exprs <- matrix(ncol = ncol(eset@exprs))
+    for (chr in chrom) {
+        uCG <- try(.usedChromExprs(eset@exprs, genome, chr, aggrfun))
+        if (inherits(uCG, "try-error") || is.null(uCG)) 
+            next
+        if (ncol(uCG$exprs) != ncol(eset@exprs)) 
+            next
+        locs <- uCG$locs
+        names(locs) <- uCG$simpleIDs
+        gx <- uCG$exprs
+        dix <- duplicated(locs)
+        if (sum(dix) & is.null(aggrfun) & method != "movbin") {
+            warning(sum(dix), " duplicate locations found...removing duplicates\n")
+            gx <- gx[!dix, ]
+            locs <- locs[!dix]
         }
-      }
-      ##cat(".")
+        r.matrix <- matrix(NA, ncol = ncol(gx), nrow(gx))
+        colnames(r.matrix) <- colnames(gx)
+        rownames(r.matrix) <- names(locs)
+        for (i in c(1:ncol(gx))) {
+            nas <- is.finite(gx[, i])
+            x <- locs[nas]
+            y <- gx[nas, i]
+            sm <- try(switch(method, movbin = try(movbin(y, ...)), 
+                supsmu = try(supsmu(x, y, ...)$y), lowess = try(lowess(x, 
+                  y, ...)$y)), silent = TRUE)
+            if (!inherits(sm, "try-error")) {
+                aa <- try(approx(x, sm, xout = locs), silent = TRUE)
+                if (!inherits(aa, "try-error")) {
+                  r.matrix[, i] <- aa$y
+                }
+            }
+        }
+        temp.eset@exprs <- rbind(temp.eset@exprs, r.matrix)
     }
-    ##cat("\n")
-    temp.eset@exprs <- rbind(temp.eset@exprs,r.matrix)
-  }
-  temp.eset@exprs <- temp.eset@exprs[-1,] ## hack because I do not know how to do rbinds elegantly
-  return(temp.eset)
+    temp.eset@exprs <- temp.eset@exprs[-1, ]
+    return(temp.eset)
 }
 
 reb <- smoothByRegion
@@ -663,3 +679,138 @@ tempLoc <- new("chromLocation")
 return(tempLoc)
 }
 
+
+
+
+buildChromLocation.2 <- function (dataPkg,major=NULL) 
+{
+    CHRLOC2chromLoc <- function(chrEnv) {
+        chrLocs <- contents(chrEnv)
+        chrLens <- sapply(chrLocs, length)
+        multis <- split(chrLens, factor(chrLens))
+        singleNames <- names(multis$"1")
+        singleLocs <- chrLocs[singleNames]
+        chromNames <- unlist(sapply(singleLocs, function(z) {
+            if (is.na(z)) 
+                z
+            else names(z)
+        }))
+        chromNames <- factor(chromNames)
+        a <- split(singleLocs, chromNames)
+        chrLocList <- lapply(a, function(x) {
+            g <- unlist(lapply(x, function(z) {
+                names(z) <- NULL
+                z
+            }))
+            g
+        })
+        if (length(multis) > 1) {
+            for (i in 2:length(multis)) {
+                curNames <- names(multis[[i]])
+                curLocs <- chrLocs[curNames]
+                for (j in 1:length(curLocs)) {
+                  curGene <- curLocs[[j]]
+                  curGeneChroms <- names(curGene)
+                  names(curGene) <- rep(curNames[j], length(curGene))
+                  for (k in 1:length(curGene)) chrLocList[[curGeneChroms[k]]] <- c(chrLocList[[curGeneChroms[k]]], 
+                    curGene[k])
+                }
+            }
+        }
+        chrLocList
+    }
+    if (!require(dataPkg, character.only = TRUE)) 
+        stop(paste("Package:", dataPkg, "is not available"))
+    pEnv <- paste("package", dataPkg, sep = ":")
+    chrLocList <- CHRLOC2chromLoc(get(paste(dataPkg, "CHRLOC", 
+        sep = ""), pos = pEnv))
+    
+    chrLocListNames <- names(chrLocList)
+    
+    if("arms" %in% major){
+	species <- tolower(substr(get(paste(dataPkg, "ORGANISM", sep = "")), 1, 1))
+	cytoEnv <- switch(species, h = get("Hs.cytoband", "package:ideogram"),
+		r = get("Rn.cytoband", "package:ideogram"), m = get("Mm.cytoband", 
+		"package:ideogram"), NULL)
+	if (is.null(cytoEnv)) stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
+	chrLocList2 <- list()
+	armList <- NULL
+	for(i in chrLocListNames){
+		cyto <- try(get(i, pos = cytoEnv),silent=T)
+		if (inherits(cyto, "try-error")) next()
+		breakPoint <- cyto@start[min(grep("q",cyto@band))]
+		ps <- chrLocList[[i]][chrLocList[[i]] < breakPoint]
+		qs <- chrLocList[[i]][chrLocList[[i]] > breakPoint]
+		l <- length(chrLocList2)
+		names <- names(chrLocList2)
+		chrLocList2 <- c(chrLocList2,list(ps))
+		chrLocList2 <- c(chrLocList2,list(qs))
+		names(chrLocList2) <- c(names,paste(i,"p",sep=""),paste(i,"q",sep=""))
+		armList <- c(armList,paste(i,"p",sep=""),paste(i,"q",sep=""))
+	}
+	chrLocList <- c(chrLocList,chrLocList2,armList=list(armList))
+	
+    }
+    
+    if("bands" %in% major){
+	species <- tolower(substr(get(paste(dataPkg, "ORGANISM", sep = "")), 1, 1))
+	cytoEnv <- switch(species, h = get("Hs.cytoband", "package:ideogram"),
+		r = get("Rn.cytoband", "package:ideogram"), m = get("Mm.cytoband", 
+		"package:ideogram"), NULL)
+	if (is.null(cytoEnv)) stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
+	chrLocList2 <- list()
+	bandList <- NULL
+	for(i in chrLocListNames){
+		cyto <- try(get(i, pos = cytoEnv),silent=T)
+		if (inherits(cyto, "try-error")) next()
+		bands <- gsub("\\..*", "", cyto@band)
+		ix <- !duplicated(bands)
+		bands <- bands[ix]
+		bands2 <- paste(i,bands,sep="")
+		start <- cyto@start[ix]
+		names <- names(chrLocList2)
+		for(j in 1:length(bands)){
+			if(j < length(bands)){
+				toAdd <- chrLocList[[i]][(start[j] < chrLocList[[i]]) & (start[j+1] > chrLocList[[i]])]
+			} else if(j==length(bands)){
+				toAdd <- chrLocList[[i]][(start[j] < chrLocList[[i]])]
+			}
+			chrLocList2 <- c(chrLocList2,list(toAdd))
+		}
+		names(chrLocList2) <- c(names,bands2)
+		bandList <- c(bandList,bands2)
+	}
+	chrLocList <- c(chrLocList,chrLocList2,bandList=list(bandList))
+    }
+    
+
+    if("mb" %in% major){
+	species <- tolower(substr(get(paste(dataPkg, "ORGANISM", sep = "")), 1, 1))
+	cytoEnv <- switch(species, h = get("Hs.cytoband", "package:ideogram"),
+		r = get("Rn.cytoband", "package:ideogram"), m = get("Mm.cytoband", 
+		"package:ideogram"), NULL)
+	if (is.null(cytoEnv)) stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
+	chrLocList2 <- list()
+	mbNamesList <- NULL
+	for(i in chrLocListNames){
+		cyto <- try(get(i, pos = cytoEnv),silent=T)
+		if (inherits(cyto, "try-error")) next()
+		
+		megaNames <- paste(i,as.character(as.integer(seq(0,floor(max(chrLocList[[i]])/1000000)*1000000,1000000))),sep="-")
+		megaList <- split(chrLocList[[i]],seq(0,floor(max(chrLocList[[i]])/1000000)*1000000,1000000))
+		names <- names(chrLocList2)
+		chrLocList2 <- c(chrLocList2,megaList)
+		names(chrLocList2) <- c(names,megaNames)
+		mbNamesList <- c(mbNamesList,megaNames)
+	}
+	chrLocList <- c(chrLocList,chrLocList2,mbList=list(mbNamesList))
+    }    
+
+    newCC <- new("chromLocation", organism = get(paste(dataPkg, 
+        "ORGANISM", sep = ""), pos = pEnv), dataSource = dataPkg, 
+        chromLocs = chrLocList, chromInfo = get(paste(dataPkg, 
+            "CHRLENGTHS", sep = ""), pos = pEnv), probesToChrom = get(paste(dataPkg, 
+            "CHR", sep = ""), pos = pEnv), geneSymbols = get(paste(dataPkg, 
+            "SYMBOL", sep = ""), pos = pEnv))
+    return(newCC)
+}

@@ -12,7 +12,7 @@ threshold (p.value = 0.005)
 }
 
 \usage{
-cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, ...) 
+cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, explode=TRUE ,...) 
 }
 \arguments{
   \item{eset}{an exprSet object}
@@ -26,6 +26,7 @@ cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005,
       included. Also see \code{absMax}}
   \item{p.value}{p.value cutoff or NA}
   \item{FUN}{ function by which to summarize the data}
+  \item{explode}{boolean - explode summary matrix into a full expression set?}
   \item{\dots}{further arguments pass to or used by the function}
 }
 \details{
