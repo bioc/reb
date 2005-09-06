@@ -209,11 +209,10 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
 	}else if (chrom == "mb") {
 		chrom2 <- genome@chromLocs$mbList
 	}
-    }
     
     if(is.null(chrom2)) stop(c("\"",chrom,"\""," is not a valid chrom selection."))
 	else chrom <- as.character(chrom2)
-		
+}		
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 
             stop("column index's required")
