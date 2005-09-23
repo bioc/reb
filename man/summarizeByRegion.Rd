@@ -12,7 +12,7 @@ threshold (p.value = 0.005)
 }
 
 \usage{
-cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, explode=TRUE ,...) 
+cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, explode=FALSE ,...) 
 }
 \arguments{
   \item{eset}{an exprSet object}
@@ -53,6 +53,17 @@ a particular array and actin changes expression under a given condition, it may
 appear as though a regional expression bias exists as 50 values in a
 small region change expression.
 
+\code{regmap} is usually the best way to plot results of this function. \code{ideogram} 
+can also be used if you set the "explode" argument to TRUE.
+
+\code{\link{buildChromLocation.2}} can be used to create a chromLocation object in 
+which the genes can be divided a number of different ways. Separating the data by chromosome 
+arm was the original intent. If you use \code{\link{buildChromLocation.2}} 
+with the "arms" argument to build your chromLocation object, set the "chrom" argument 
+to "arms" in this function. 
+
+
+
 }
 \value{
   \item{m}{A matrix of summary statistics}
@@ -61,7 +72,7 @@ small region change expression.
 \author{Kyle A. Furge}
 \note{}
 
-\seealso{\code{\link{buildChromMap}},\code{\link{t.binom.test}}}
+\seealso{\code{\link{buildChromMap}},\code{\link{t.binom.test}},\code{\link{regmap}},\code{\link{buildChromLocation.2}}}
 \examples{
 
 ## 
