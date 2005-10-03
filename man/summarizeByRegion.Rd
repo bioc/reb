@@ -72,7 +72,7 @@ to "arms" in this function.
 \author{Kyle A. Furge}
 \note{}
 
-\seealso{\code{\link{buildChromMap}},\code{\link{t.binom.test}},\code{\link{regmap}},\code{\link{buildChromLocation.2}}}
+\seealso{\code{\link{buildChromMap}},\code{\link{t.binom.test}},\code{\link{regmap}},\code{\link[ideogram]{buildChromLocation.2}}}
 \examples{
 
 ## 

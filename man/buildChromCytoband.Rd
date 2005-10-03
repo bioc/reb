@@ -21,7 +21,7 @@ a chromLocation object
   Kyle A. Furge, \email{kyle.furge@vai.org}
 }
 
-\seealso{ ~\code{\link{buildChromLocation}} }
+\seealso{ \code{\link[annotate]{buildChromLocation}} }
 \examples{
   humanBands <- buildChromCytoband("h")
   humanBands@chromLocs[["1"]]
