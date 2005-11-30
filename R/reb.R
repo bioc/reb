@@ -54,7 +54,7 @@ regmap <- function(m,scale=c(-6,6),na.color=par("bg"),...) {
 
 summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = TRUE, aggrfun = NULL, p.value = 0.005, FUN = t.test, explode=FALSE ,...) 
 {
-#if (length(chrom) == 1) {
+
         if (chrom == "ALL") {
             chrom <- names(attr(genome, "chromInfo"))
             if (is.null(chrom) || is.na(chrom)) 
@@ -66,10 +66,9 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
 	}else if (chrom == "mb") {
 		chrom <- genome@chromLocs$mbList
 	}
-#    }
-    #if(is.null(chrom2)) stop(c("\"",chrom,"\""," is not a valid chrom selection."))
-#	else chrom <- as.character(chrom2)
-    
+	
+	if(class(eset) != "exprSet") eset <- new("exprSet",exprs=eset)
+		
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 
             stop("column index's required")
@@ -130,7 +129,7 @@ cgma <- summarizeByRegion
 
 movbin  <- function(v,span=seq(25,length(v)*.3,by=5),summarize=mean) {
   if(any(span < 1)) {
-    span <- floor(length(x)*span)
+    span <- floor(length(v)*span)
   }
   if(length(v) <=3) return(NULL)
   
@@ -197,22 +196,21 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
     aggrfun = absMax, method = c("movbin", "supsmu", "lowess"), 
     ...) 
 {
-    if (length(chrom) == 1) {
-        if (chrom == "ALL") {
-            chrom2 <- names(attr(genome, "chromInfo"))
-            if (is.null(chrom2) || is.na(chrom2)) 
-                stop("chromLoc object does not contain any chromInfo\n")
-        }else if (chrom == "arms") {
-		chrom2 <- genome@chromLocs$armList
+    
+	if (chrom == "ALL") {
+	    chrom <- names(attr(genome, "chromInfo"))
+	    if (is.null(chrom) || is.na(chrom)) 
+		stop("chromLoc object does not contain any chromInfo\n")
+	}else if (chrom == "arms") {
+		chrom <- genome@chromLocs$armList
 	}else if (chrom == "bands") {
-		chrom2 <- genome@chromLocs$bandList
+		chrom <- genome@chromLocs$bandList
 	}else if (chrom == "mb") {
-		chrom2 <- genome@chromLocs$mbList
+		chrom <- genome@chromLocs$mbList
 	}
     
-    if(is.null(chrom2)) stop(c("\"",chrom,"\""," is not a valid chrom selection."))
-	else chrom <- as.character(chrom2)
-}		
+	if(class(eset) != "exprSet") eset <- new("exprSet",exprs=eset)
+	
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 
             stop("column index's required")
@@ -253,7 +251,7 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
             y <- gx[nas, i]
             sm <- try(switch(method, movbin = try(movbin(y, ...)), 
                 supsmu = try(supsmu(x, y, ...)$y), lowess = try(lowess(x, 
-                  y, ...)$y)), silent = TRUE)
+                  y, ...)$y)), silent = FALSE)
             if (!inherits(sm, "try-error")) {
                 aa <- try(approx(x, sm, xout = locs), silent = TRUE)
                 if (!inherits(aa, "try-error")) {

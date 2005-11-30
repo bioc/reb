@@ -5,7 +5,7 @@
 \description{
 Splits the data into subsets based on genome mapping information,
 computes summary statistics for each region, and returns the results in
-a convenient form. (cgma stands for Computer Generated Microarray Analysis)
+a convenient form. (cgma stands for Comparative Genomic Microarray Analysis)
 
 This function supplies a t.test function at the emperically derived significance
 threshold (p.value = 0.005)
