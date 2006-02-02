@@ -67,7 +67,7 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
 		chrom <- genome@chromLocs$mbList
 	}
 	
-	if(class(eset) != "exprSet") eset <- new("exprSet",exprs=eset)
+	if(class(eset) == "exprSet") exprs <- eset@exprs
 		
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 
@@ -75,15 +75,16 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
     }
     if (!is.null(ref)) {
         cat("Creating ratios...", "\n")
-        ref_mean <- apply(eset@exprs[, ref], 1, mean, na.rm = TRUE)
-        eset@exprs <- sweep(eset@exprs, 1, ref_mean, "-")
+        ref_mean <- apply(exprs[, ref], 1, mean, na.rm = TRUE)
+        exprs <- sweep(exprs, 1, ref_mean, "-")
     }
     if (center) 
-        eset@exprs <- scale(eset@exprs, scale = F)
-    blank <- rep(NA, length = length(sampleNames(eset)))
+        exprs <- scale(exprs, scale = F)
+    #blank <- rep(NA, length = length(sampleNames(eset)))
+    blank <- rep(NA, length = length(colnames(exprs)))
     sum.statistic <- vector()
     for (i in chrom) {
-        ag.list <- .usedChromExprs(eset@exprs, genome, i, aggrfun)
+        ag.list <- .usedChromExprs(exprs, genome, i, aggrfun)
         if (is.null(ag.list)) {
             sum.statistic <- rbind(sum.statistic, blank)
             next
@@ -104,15 +105,16 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
         sum.statistic <- rbind(sum.statistic, stat)
     }
     rownames(sum.statistic) <- as.character(chrom)
-    colnames(sum.statistic) <- sampleNames(eset)
+    #colnames(sum.statistic) <- sampleNames(eset)
+    colnames(sum.statistic) <- colnames(exprs)
     
     if(explode){
-	nExprs <- eset@exprs
+	nExprs <- exprs
 	nExprs[1:nrow(nExprs),1:ncol(nExprs)] <- NA
 	
 	cat("Exploding summary matrix...", "\n")
 	for(i in chrom) 
-		for(j in 1:ncol(eset@exprs)) nExprs[.usedChromExprs(eset@exprs,genome,i)$geneIDs,j] <- sum.statistic[i,j]
+		for(j in 1:ncol(exprs)) nExprs[.usedChromExprs(exprs,genome,i)$geneIDs,j] <- sum.statistic[i,j]
 	return(nExprs)
     }
    
