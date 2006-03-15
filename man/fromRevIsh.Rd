@@ -36,7 +36,7 @@ and the columns correspond to the sample names.
 mb.chr <- buildChromCytoband("h")
 
 data(mcr.eset)
-data(ideogramExample)
+data(idiogramExample)
 	## Create a vector with the index of normal samples
 norms <- grep("MNC",colnames(mcr.eset@exprs))
 	## Smooth the data using the default 'movbin' method, with the normal samples as reference and median centering
@@ -44,15 +44,15 @@ cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
 	## Mask the cset to remove noise
 exprs <- cset@exprs[,-norms]
 exprs[abs(exprs) < 1.96] <- NA
-	## Extract the aberrations on the 3rd chromosome
+	## Extract the aberrations on the 5th chromosome
 revish <- revish(exprs,vai.chr,"5")
 	## Convert back to matrix
 reconverted <- fromRevIsh(revish[[1]],revish[[2]],"5")
 
 
 layout(cbind(1,2))
-ideogram(cset@exprs[,-norms],vai.chr,"5",method="i",dlim=c(-2,2),col=.rwb,main="chr 5 reb results")
-ideogram(reconverted,mb.chr,"5",method="i",dlim=c(-1,1),col=.rwb,main="chr 5 converted \n and re-converted")
+idiogram(cset@exprs[,-norms],vai.chr,"5",method="i",dlim=c(-2,2),col=.rwb,main="chr 5 reb results")
+idiogram(reconverted,mb.chr,"5",method="i",dlim=c(-1,1),col=.rwb,main="chr 5 converted \n and re-converted")
 
 
 	

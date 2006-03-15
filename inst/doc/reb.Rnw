@@ -5,7 +5,7 @@
 
 
 % \VignetteIndexEntry{Smoothing of Microarray Data}
-% \VignetteDepends{ideogram}
+% \VignetteDepends{idiogram}
 % \VignetteKeywords{Expression Analysis}
 %\VignettePackage{reb}
 
@@ -42,9 +42,9 @@ Grand Rapids, MI
 \section{Overview}
 
 This package contains functions to analyze gene expression data with the aim of identifying regional expression biases.
-To make use of these tools you will need to have Bioconductor installed along with the \Rpackage{ideogram} 
+To make use of these tools you will need to have Bioconductor installed along with the \Rpackage{idiogram} 
 package. These must be installed in your version of R and when you start R you must load them with the
-\Rfunction{library} command. The \Rpackage{ideogram} package duplicates some of the functionality found in 
+\Rfunction{library} command. The \Rpackage{idiogram} package duplicates some of the functionality found in 
 the \Rfunction{plotChr} function of the \Rpackage{geneplotter} library. Please examine both packages and determine which one best suits your analysis requirements.  
 
 This vignette is divided into two parts, basic and advanced reb prediction. Under the "Basic" section  the techniques described are computationally faster, yet more rudimentary.
@@ -54,7 +54,7 @@ Under the "Advanced" section, the techniques described are computationally slowe
 
 <<>>=
 library(reb)
-library(ideogram)
+library(idiogram)
 @
 
 \section{Basic Regional Expression Bias (REB) predictions}
@@ -76,13 +76,13 @@ Using the \Robject{aggregate.by.loc} argument can partially correct this situtat
 
 The mcr.eset is a two-color gene expression \Robject{exprSet} object with cytogenetically complex (MCR) and normal control (MNC) samples that were profiled against a pooled-cell line reference. For specifics, see PMID: 15377468
 
-Please note that we are summarizing this data by chromosome. The function \Rfunction{buildChromMap} can be used to build a \Robject{chromLocation} object where the gene expression values can separated by more refined cytogenetic mapping information, for example by chromosome arm (1p,1q, 2p, 2q, etc) or chromosome band (1p1, 1p2, 1p3).  Hs.arm and Hs.cytoband are data structures that contain chromosome arm and band information for the human genome and are included in this package and ideogram, respectively.
+Please note that we are summarizing this data by chromosome. The function \Rfunction{buildChromMap} can be used to build a \Robject{chromLocation} object where the gene expression values can separated by more refined cytogenetic mapping information, for example by chromosome arm (1p,1q, 2p, 2q, etc) or chromosome band (1p1, 1p2, 1p3).  Hs.arm and Hs.cytoband are data structures that contain chromosome arm and band information for the human genome and are included in this package and idiogram, respectively.
 
 For example: "affy.arms <- buildChromMap("hgu133plus2",Hs.arms)" 
 
 <<>>=
 data(mcr.eset)
-data(ideogramExample)
+data(idiogramExample)
 
 ref.ix <- grep("MNC",colnames(mcr.eset@exprs))
 mcr.sum <- summarizeByRegion(mcr.eset,vai.chr,ref=ref.ix)
@@ -120,7 +120,7 @@ mcr.cset <- smoothByRegion(mcr.eset,vai.chr,ref=ref.ix)
 @
 
 The \Rfunction{smoothByRegion} returns an \Robject{exprSet} object that contains the smoothed gene expression data.
-The smoothed gene expression data can be plotted using the \Rpackage{ideogram} package. Please note that in an effort to make this vignette of a reasonable size, we have not used the mideogram function. In this situation it could be used like this: mideogram(mcr.cset@exprs[,complex.ix],vai.chr,method="i",col=.rwb)
+The smoothed gene expression data can be plotted using the \Rpackage{idiogram} package. Please note that in an effort to make this vignette of a reasonable size, we have not used the midiogram function. In this situation it could be used like this: midiogram(mcr.cset@exprs[,complex.ix],vai.chr,method="i",col=.rwb)
 
 Also note that we are using an empirically derived mask of 1.96 when plotting this data. This not only filters out possible noise, but makes the image files smaller for this vignette.
 
@@ -131,7 +131,7 @@ data[abs(data) < 1.96] <- NA
 op <- par(no.readonly=TRUE)
 layout(rbind(c(1,2),c(3,4)))
 for(i in c("2","5","11","6")) 
-ideogram(data,vai.chr,method="i",col=.rwb,dlim=c(-4,4),chr=i)
+idiogram(data,vai.chr,method="i",col=.rwb,dlim=c(-4,4),chr=i)
 par(op)
 @
 \end{center}
@@ -140,7 +140,7 @@ A closer look at a single chromosome in the samples with complex karyotypes. Not
 
 \begin{center}
 <<fig=TRUE, echo=TRUE>>=
-ideogram(mcr.cset@exprs[,complex.ix],vai.chr,
+idiogram(mcr.cset@exprs[,complex.ix],vai.chr,
 method="m",chr=5,dlim=c(-5,5),type="l",lty=1)
 @
 \end{center}

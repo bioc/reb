@@ -43,10 +43,10 @@ MCR eset data was obtained with permission. See PMID: 15377468
 \seealso{ \code{\link{reb}} }
 \examples{
 
-data(ideogramExample)
+data(idiogramExample)
 ix <- abs(colo.eset@exprs) > .225
 colo.eset@exprs[ix] <- NA
-ideogram(colo.eset@exprs,ucsf.chr,"14",method="i",dlim=c(-1,1),col=.rwb)
+idiogram(colo.eset@exprs,ucsf.chr,"14",method="i",dlim=c(-1,1),col=.rwb)
 revlist<- revish(colo.eset@exprs,ucsf.chr,"14")
 str(revlist)
 

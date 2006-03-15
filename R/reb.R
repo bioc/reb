@@ -129,7 +129,12 @@ cgma <- summarizeByRegion
 ## smoothing code
 
 
-movbin  <- function(v,span=seq(25,length(v)*.3,by=5),summarize=mean) {
+movbin  <- function(v,span=NULL,summarize=mean) {
+  if(is.null(span)){
+	spanErr <- try(span <- seq(25,length(v)*.3,by=5),silent=T)
+	if(inherits(spanErr,"try-error")) return(NULL)
+  }
+
   if(any(span < 1)) {
     span <- floor(length(v)*span)
   }
@@ -348,48 +353,42 @@ buildChromMap <- function(dataPkg,regions) {
   }
   cytoEnv <- NULL
   cytoEnv <- switch(organism,
-                    "h"=get("Hs.cytoband","package:ideogram"),
-                    "r"=get("Rn.cytoband","package:ideogram"),
-                    "m"=get("Mm.cytoband","package:ideogram"),
+                    "h"=get("Hs.cytoband","package:idiogram"),
+                    "r"=get("Rn.cytoband","package:idiogram"),
+                    "m"=get("Mm.cytoband","package:idiogram"),
                     NULL)
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
 
   bands <- paste(chr,(gsub("\\..*", "",attr(get(chr,cytoEnv),"band"))),sep="")
   start <- as.numeric(attr(get(chr,cytoEnv),"start"),sep="")
-
+  end <- as.numeric(attr(get(chr,cytoEnv),"end"),sep="")
+  actualEnd <- end[length(end)] 
   start <- start[!duplicated(bands)]
+  end <- end[!duplicated(bands)]
   bands <- bands[!duplicated(bands)]	
-
-  abc <- .usedChromExprs(masked,genome,chr)
+  len <- length(start)
   
+  end[1:len-1] <- start[2:len]
+  end[len] <- actualEnd
+  abc <- .usedChromExprs(masked,genome,chr)
   
   ids <- abc$geneIDs
   names <- vector(length=length(ids))
-  
-  ##str(abc)
-  ##str(ids)
-  ##str(names)
-  ##str(bands)
-  ##str(start)
-  
-  for(i in 1:length(ids)){
-    counter <- 1
-    while((abc$locs[i] >start[counter]) & (counter <length(start))) counter <- counter+1
-    ##cat(counter)
-    names[i] <- bands[counter]
-    ##cat(i)
+
+  for(i in 1:length(names)){
+	counter <- 1
+	cur <- abc$locs[i]
+	try(while(cur < start[counter] | cur > end[counter]) counter <- counter + 1,silent=T)
+	names[i] <- bands[counter]
   }
-  
-  
-  ##str(names)
+
   bands <- names
-  
   names(bands) <- ids
-  ##str(bands)
+
   aggregated <- aggregate(abc$exprs,list(bands),.isAbnormal)
   tempMat <- as.matrix(aggregated[2:length(aggregated)])
-  rownames(tempMat) <- unique(bands)
+  rownames(tempMat) <- as.character(aggregated[,1])
   return(tempMat)	
 }
 
@@ -402,9 +401,9 @@ writeGFF3 <- function(cset,genome,chr,file.prefix="temp.gff",organism=NULL){
   }
   cytoEnv <- NULL
 	cytoEnv <- switch(organism,
-                          "h"=get("Hs.cytoband","package:ideogram"),
-                          "r"=get("Rn.cytoband","package:ideogram"),
-                          "m"=get("Mm.cytoband","package:ideogram"),
+                          "h"=get("Hs.cytoband","package:idiogram"),
+                          "r"=get("Rn.cytoband","package:idiogram"),
+                          "m"=get("Mm.cytoband","package:idiogram"),
                           NULL)
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
@@ -472,9 +471,9 @@ revish <- function(cset,genome,chr,organism=NULL){
   }
   cytoEnv <- NULL
   cytoEnv <- switch(organism,
-                    "h"=get("Hs.cytoband","package:ideogram"),
-                    "r"=get("Rn.cytoband","package:ideogram"),
-                    "m"=get("Mm.cytoband","package:ideogram"),
+                    "h"=get("Hs.cytoband","package:idiogram"),
+                    "r"=get("Rn.cytoband","package:idiogram"),
+                    "m"=get("Mm.cytoband","package:idiogram"),
                     NULL)
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
@@ -553,9 +552,9 @@ revish <- function(cset,genome,chr,organism=NULL){
 fromRevIsh <- function(enhList,dimList,chr,organism="h"){
 
   cytoEnv <- switch(organism,
-                    "h"=get("Hs.cytoband","package:ideogram"),
-                    "r"=get("Rn.cytoband","package:ideogram"),
-                    "m"=get("Mm.cytoband","package:ideogram"),
+                    "h"=get("Hs.cytoband","package:idiogram"),
+                    "r"=get("Rn.cytoband","package:idiogram"),
+                    "m"=get("Mm.cytoband","package:idiogram"),
                     NULL)
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")

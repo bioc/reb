@@ -58,7 +58,7 @@ aggrfun=absMax, method = c("movbin", "supsmu", "lowess"), ...)
   Summarizing the 50 expression values to a single value can partially
   correct for this effect. 
  
-  The ideogram package can be used to plot the regional expression bias.
+  The idiogram package can be used to plot the regional expression bias.
 }
 
 \value{
@@ -77,7 +77,7 @@ MCR eset data was obtained with permission. See PMID: 15377468
   Karl J. Dykema, \email{karl.dykema@vai.org} 
 }
 
-\seealso{ \code{\link{movbin}},\code{ideogram}  }
+\seealso{ \code{\link{movbin}},\code{idiogram}  }
 
 \examples{
 
@@ -87,7 +87,7 @@ MCR eset data was obtained with permission. See PMID: 15377468
 
 
 data("mcr.eset")
-data(ideogramExample)
+data(idiogramExample)
 
 ## Create a vector with the index of normal samples
 norms <- grep("MNC",colnames(mcr.eset@exprs))
@@ -97,8 +97,8 @@ norms <- grep("MNC",colnames(mcr.eset@exprs))
 
 cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
 
-## Display the results with mideogram
-mideogram(cset@exprs[,-norms],vai.chr,method="i",dlim=c(-5,5),col=.rwb)
+## Display the results with midiogram
+midiogram(cset@exprs[,-norms],vai.chr,method="i",dlim=c(-5,5),col=.rwb)
 }
 \keyword{manip}
 

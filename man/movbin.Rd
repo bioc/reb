@@ -6,7 +6,7 @@
   biases using an moving (running) approximated binomial test.
 }
 \usage{
-movbin(v,span=seq(25,length(v)*.3,by=5),summarize=mean)
+movbin(v,span=NULL,summarize=mean)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,7 +15,7 @@ movbin(v,span=seq(25,length(v)*.3,by=5),summarize=mean)
     the number of points to include when the approximated binomial test
     is applied to \code{v}. While mixed for the defaults, the span can
     be specified as fraction of the observation or actual sizes, but
-    \emph{not} a mixture}
+    \emph{not} a mixture - defaults to: seq(25,length(v)*.3,by=5)}
   \item{summarize}{function that is used to summarize the results from
     multiple spans. if NULL, a matrix with \code{length(span)} rows
     and \code{length(v)} columns is returned.}

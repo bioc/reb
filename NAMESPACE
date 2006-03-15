@@ -1,3 +1,3 @@
 useDynLib(reb)
 exportPattern("^[^\\.]")
-importFrom(ideogram, .usedChromExprs,.rwb)
+importFrom(idiogram, .usedChromExprs,.rwb,idiogram)

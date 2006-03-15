@@ -53,7 +53,7 @@ a particular array and actin changes expression under a given condition, it may
 appear as though a regional expression bias exists as 50 values in a
 small region change expression.
 
-\code{regmap} is usually the best way to plot results of this function. \code{ideogram} 
+\code{regmap} is usually the best way to plot results of this function. \code{idiogram} 
 can also be used if you set the "explode" argument to TRUE.
 
 \code{\link{buildChromLocation.2}} can be used to create a chromLocation object in 
@@ -72,7 +72,7 @@ to "arms" in this function.
 \author{Kyle A. Furge}
 \note{}
 
-\seealso{\code{\link{buildChromMap}},\code{\link{t.binom.test}},\code{\link{regmap}},\code{\link[ideogram]{buildChromLocation.2}}}
+\seealso{\code{\link{buildChromMap}},\code{\link{t.binom.test}},\code{\link{regmap}},\code{\link[idiogram]{buildChromLocation.2}}}
 \examples{
 
 ## 
@@ -108,7 +108,7 @@ if(require(hu6800) && require(golubEsets)) {
 ## This reflects chromosome gains and losses as validated by CGH
 
    data("mcr.eset")
-   data(ideogramExample)
+   data(idiogramExample)
    norms <- grep("MNC",colnames(mcr.eset@exprs))
    bias <- cgma(mcr.eset,vai.chr,ref=norms)
    regmap(bias,col=topo.colors(50)) 
