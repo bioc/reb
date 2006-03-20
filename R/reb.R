@@ -335,21 +335,21 @@ buildChromMap <- function(dataPkg,regions) {
 
 ### to BAND format functions
 
-.isAbnormal <- function(x,percent=0.5){
-  ##if(sum(x>0,na.rm=T) > percent*length(x))return (1)
-  ##if(sum(x<0,na.rm=T) > percent*length(x))return (-1)
-  x[is.na(x)] <- 0
-  if(sum(x>0) > percent*length(x))return (1)
-  if(sum(x<0) > percent*length(x))return (-1)
-  
-  return(0)
+isAbnormal <- function(x,percent=0.5){
+	x[is.na(x)] <- 0
+	if(sum(x>0) > percent*length(x))return (1)
+	if(sum(x<0) > percent*length(x))return (-1)
+	return(0)
 }
 
 
-.cset2band <- function(masked,genome,chr,organism=NULL){
+cset2band <- function(exprs,genome,chr="ALL",organism=NULL,FUN=isAbnormal,...){
   
   if(is.null(organism)) {
     organism <- tolower(substr(genome@organism,1,1))
+  }
+  if(class(exprs) == "exprSet") {
+    exprs <- exprs@exprs
   }
   cytoEnv <- NULL
   cytoEnv <- switch(organism,
@@ -360,36 +360,53 @@ buildChromMap <- function(dataPkg,regions) {
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
 
-  bands <- paste(chr,(gsub("\\..*", "",attr(get(chr,cytoEnv),"band"))),sep="")
-  start <- as.numeric(attr(get(chr,cytoEnv),"start"),sep="")
-  end <- as.numeric(attr(get(chr,cytoEnv),"end"),sep="")
-  actualEnd <- end[length(end)] 
-  start <- start[!duplicated(bands)]
-  end <- end[!duplicated(bands)]
-  bands <- bands[!duplicated(bands)]	
-  len <- length(start)
-  
-  end[1:len-1] <- start[2:len]
-  end[len] <- actualEnd
-  abc <- .usedChromExprs(masked,genome,chr)
-  
-  ids <- abc$geneIDs
-  names <- vector(length=length(ids))
+  	if (chr == "ALL") {
+	    chr <- names(attr(genome, "chromInfo"))
+	    if (is.null(chr) || is.na(chr)) 
+		stop("chrLoc object does not contain any chrInfo\n")
+	}else if (chr == "arms") {
+		chr <- genome@chromLocs$armList
+	}else if (chr == "bands") {
+		chr <- genome@chromLocs$bandList
+	}else if (chr == "mb") {
+		chr <- genome@chromLocs$mbList
+	}
 
-  for(i in 1:length(names)){
-	counter <- 1
-	cur <- abc$locs[i]
-	try(while(cur < start[counter] | cur > end[counter]) counter <- counter + 1,silent=T)
-	names[i] <- bands[counter]
-  }
-
-  bands <- names
-  names(bands) <- ids
-
-  aggregated <- aggregate(abc$exprs,list(bands),.isAbnormal)
-  tempMat <- as.matrix(aggregated[2:length(aggregated)])
-  rownames(tempMat) <- as.character(aggregated[,1])
-  return(tempMat)	
+	returnMat <- NULL
+	
+	for(chr in chr){  
+	  bands <- paste(chr,(gsub("\\..*", "",attr(get(chr,cytoEnv),"band"))),sep="")
+	  start <- as.numeric(attr(get(chr,cytoEnv),"start"),sep="")
+	  end <- as.numeric(attr(get(chr,cytoEnv),"end"),sep="")
+	  actualEnd <- end[length(end)] 
+	  start <- start[!duplicated(bands)]
+	  end <- end[!duplicated(bands)]
+	  bands <- bands[!duplicated(bands)]	
+	  len <- length(start)
+	  
+	  end[1:len-1] <- start[2:len]
+	  end[len] <- actualEnd
+	  abc <- .usedChromExprs(exprs,genome,chr)
+	  
+	  ids <- abc$geneIDs
+	  names <- vector(length=length(ids))
+	
+	  for(i in 1:length(names)){
+		counter <- 1
+		cur <- abc$locs[i]
+		try(while(cur < start[counter] | cur > end[counter]) counter <- counter + 1,silent=T)
+		names[i] <- bands[counter]
+	  }
+	
+	  bands <- names
+	  names(bands) <- ids
+	
+	  aggregated <- aggregate(abc$exprs,list(bands),FUN,...)
+	  tempMat <- as.matrix(aggregated[2:length(aggregated)])
+	  rownames(tempMat) <- as.character(aggregated[,1])
+	  returnMat <- rbind(returnMat,tempMat)
+	  }
+return(returnMat)	
 }
 
 ####     gff3     #####
@@ -408,7 +425,7 @@ writeGFF3 <- function(cset,genome,chr,file.prefix="temp.gff",organism=NULL){
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
   
-  tempMat <- .cset2band(cset,genome,chr)
+  tempMat <- cset2band(cset,genome,chr)
   
   gffList <- list()
   counter <- 0
@@ -478,7 +495,7 @@ revish <- function(cset,genome,chr,organism=NULL){
   if(is.null(cytoEnv))
     stop("Cannot determine organism type, please specify (h)uman, (r)at, or (m)ouse")
   
-  tempMat <- .cset2band(cset,genome,chr)
+  tempMat <- cset2band(cset,genome,chr)
   
   rows <- match(paste(chr,unique(gsub("\\..*", "",attr(get(chr,cytoEnv),"band"))),sep=""),rownames(tempMat))
   rows <- rows[!is.na(rows)]
