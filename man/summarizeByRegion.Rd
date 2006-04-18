@@ -82,14 +82,15 @@ to "arms" in this function.
 ##       "hu6800" is under MetaData, "golubEsets" is under Experimental Data.
 
 if(require(hu6800) && require(golubEsets)) {
+   data(Golub_Train)
    cloc <- buildChromMap("hu6800",c("1p","1q","2p","2q","3p","3q"))
 
    ## For one-color expression data
    ## compare the ALL samples to the AML samples
    ## not particularly informative in this example
 
-   aml.ix <- which(golubTrain$"ALL.AML" == "AML")
-   bias <- cgma(eset=golubTrain,ref=aml.ix,genome=cloc)
+   aml.ix <- which(Golub_Train$"ALL.AML" == "AML")
+   bias <- cgma(eset=Golub_Train,ref=aml.ix,genome=cloc)
    regmap(bias,col=.rwb) 
 } else print("This example requires the hu6800 and golubEsets data
    packages.")
