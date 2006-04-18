@@ -54,7 +54,6 @@ regmap <- function(m,scale=c(-6,6),na.color=par("bg"),...) {
 
 summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = TRUE, aggrfun = NULL, p.value = 0.005, FUN = t.test, explode=FALSE ,...) 
 {
-
         if (chrom == "ALL") {
             chrom <- names(attr(genome, "chromInfo"))
             if (is.null(chrom) || is.na(chrom)) 
@@ -68,6 +67,7 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
 	}
 	
 	if(class(eset) == "exprSet") exprs <- eset@exprs
+	if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
 		
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 

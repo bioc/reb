@@ -56,9 +56,9 @@ small region change expression.
 \code{regmap} is usually the best way to plot results of this function. \code{idiogram} 
 can also be used if you set the "explode" argument to TRUE.
 
-\code{\link{buildChromLocation.2}} can be used to create a chromLocation object in 
+\code{\link[idiogram]{buildChromLocation.2}} can be used to create a chromLocation object in 
 which the genes can be divided a number of different ways. Separating the data by chromosome 
-arm was the original intent. If you use \code{\link{buildChromLocation.2}} 
+arm was the original intent. If you use \code{\link[idiogram]{buildChromLocation.2}} 
 with the "arms" argument to build your chromLocation object, set the "chrom" argument 
 to "arms" in this function. 
 
