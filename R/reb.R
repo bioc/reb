@@ -67,7 +67,8 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
 	}
 	
 	if(class(eset) == "exprSet") exprs <- eset@exprs
-	if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
+	else if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
+	else exprs <- eset
 		
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 
