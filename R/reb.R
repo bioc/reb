@@ -217,7 +217,10 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
 		chrom <- genome@chromLocs$mbList
 	}
     
-	if(class(eset) != "exprSet") eset <- new("exprSet",exprs=eset)
+	if(class(eset) == "exprSet") exprs <- eset@exprs
+	else if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
+	else exprs <- eset
+		
 	
     if (!is.null(ref)) {
         if (!is.numeric(ref)) 
@@ -228,18 +231,18 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
         stop(sQuote(method), " is not found")
     if (!is.null(ref)) {
         cat("Creating ratios...", "\n")
-        ref_mean <- apply(eset@exprs[, ref], 1, mean, na.rm = TRUE)
-        eset@exprs <- sweep(eset@exprs, 1, ref_mean, "-")
+        ref_mean <- apply(exprs[, ref], 1, mean, na.rm = TRUE)
+        exprs <- sweep(exprs, 1, ref_mean, "-")
     }
     if (center) 
-        eset@exprs <- scale(eset@exprs, scale = F)
-    temp.eset <- eset
-    temp.eset@exprs <- matrix(ncol = ncol(eset@exprs))
+        exprs <- scale(exprs, scale = F)
+    #temp.eset <- eset
+    temp.exprs <- matrix(ncol = ncol(exprs))
     for (chr in chrom) {
-        uCG <- try(.usedChromExprs(eset@exprs, genome, chr, aggrfun))
+        uCG <- try(.usedChromExprs(exprs, genome, chr, aggrfun))
         if (inherits(uCG, "try-error") || is.null(uCG)) 
             next
-        if (ncol(uCG$exprs) != ncol(eset@exprs)) 
+        if (ncol(uCG$exprs) != ncol(exprs)) 
             next
         locs <- uCG$locs
         names(locs) <- uCG$simpleIDs
@@ -267,10 +270,10 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
                 }
             }
         }
-        temp.eset@exprs <- rbind(temp.eset@exprs, r.matrix)
+        temp.exprs <- rbind(temp.exprs, r.matrix)
     }
-    temp.eset@exprs <- temp.eset@exprs[-1, ]
-    return(temp.eset)
+    temp.exprs <- temp.exprs[-1, ]
+    return(temp.exprs)
 }
 
 reb <- smoothByRegion
