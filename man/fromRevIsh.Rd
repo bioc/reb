@@ -42,7 +42,7 @@ norms <- grep("MNC",colnames(mcr.eset@exprs))
 	## Smooth the data using the default 'movbin' method, with the normal samples as reference and median centering
 cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
 	## Mask the cset to remove noise
-exprs <- cset@exprs[,-norms]
+exprs <- cset[,-norms]
 exprs[abs(exprs) < 1.96] <- NA
 	## Extract the aberrations on the 5th chromosome
 revish <- revish(exprs,vai.chr,"5")
@@ -51,7 +51,7 @@ reconverted <- fromRevIsh(revish[[1]],revish[[2]],"5")
 
 
 layout(cbind(1,2))
-idiogram(cset@exprs[,-norms],vai.chr,"5",method="i",dlim=c(-2,2),col=.rwb,main="chr 5 reb results")
+idiogram(cset[,-norms],vai.chr,"5",method="i",dlim=c(-2,2),col=.rwb,main="chr 5 reb results")
 idiogram(reconverted,mb.chr,"5",method="i",dlim=c(-1,1),col=.rwb,main="chr 5 converted \n and re-converted")
 
 

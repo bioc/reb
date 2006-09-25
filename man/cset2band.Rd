@@ -49,7 +49,7 @@ cset2band(exprs, genome, chr = "ALL", organism = NULL, FUN = isAbnormal, ...)
    cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
 
 ## Mask the result to remove noise
-   exprs <- cset@exprs[,-norms]
+   exprs <- cset[,-norms]
    exprs[abs(exprs) < 1.96] <- NA
 
 ## Starting data
