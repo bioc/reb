@@ -126,7 +126,7 @@ Also note that we are using an empirically derived mask of 1.96 when plotting th
 
 \begin{center}
 <<fig=TRUE, echo=TRUE>>=
-data <- mcr.cset@exprs[,complex.ix]
+data <- mcr.cset[,complex.ix]
 data[abs(data) < 1.96] <- NA
 op <- par(no.readonly=TRUE)
 layout(rbind(c(1,2),c(3,4)))
@@ -140,7 +140,7 @@ A closer look at a single chromosome in the samples with complex karyotypes. Not
 
 \begin{center}
 <<fig=TRUE, echo=TRUE>>=
-idiogram(mcr.cset@exprs[,complex.ix],vai.chr,
+idiogram(mcr.cset[,complex.ix],vai.chr,
 method="m",chr=5,dlim=c(-5,5),type="l",lty=1)
 @
 \end{center}
