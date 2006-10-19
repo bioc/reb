@@ -66,8 +66,10 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = 
 		chrom <- genome@chromLocs$mbList
 	}
 	
-	if(class(eset) == "exprSet") exprs <- eset@exprs
-	else if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
+	if(class(eset) == "exprSet") {
+		exprs <- eset@exprs
+		.Deprecated(msg=Biobase:::EXPRSET_DEPR_MSG)
+	}else if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
 	else exprs <- eset
 		
     if (!is.null(ref)) {
@@ -217,7 +219,10 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
 		chrom <- genome@chromLocs$mbList
 	}
     
-	if(class(eset) == "exprSet") exprs <- eset@exprs
+	if(class(eset) == "exprSet"){
+		exprs <- eset@exprs
+		.Deprecated(msg=Biobase:::EXPRSET_DEPR_MSG)
+	}
 	else if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
 	else exprs <- eset
 		
@@ -354,6 +359,7 @@ cset2band <- function(exprs,genome,chr="ALL",organism=NULL,FUN=isAbnormal,...){
   }
   if(class(exprs) == "exprSet") {
     exprs <- exprs@exprs
+    .Deprecated(msg=Biobase:::EXPRSET_DEPR_MSG)
   }
   cytoEnv <- NULL
   cytoEnv <- switch(organism,
