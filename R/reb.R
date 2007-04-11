@@ -131,6 +131,64 @@ cgma <- summarizeByRegion
 ##
 ## smoothing code
 
+movt <- function(v,span=NULL,summarize=mean){
+
+   if (is.null(span)) {
+        spanErr <- try(span <- seq(25, length(v) * 0.3, by = 5),
+            silent = T)
+        if (inherits(spanErr, "try-error"))
+            return(NULL)
+    }
+    if (any(span < 1)) {
+        span <- floor(length(v) * span)
+    }
+    if (length(v) <= 3)
+        return(NULL)
+    if (max(span) > length(v)) {
+        warning("span is longer then data series. It will be truncated")
+        span[span > length(v)] <- length(v)
+    }
+    if (is.null(span))
+        stop("Invalid window span")
+    v[is.na(v)] <- -999
+
+   finalMatrix <- matrix(data=NA,nrow=length(span),ncol=length(v))
+
+   for(ABC in 1:length(span)){
+		meanMatrix <- .genMeanMatrix(v,span[ABC],length(v))
+		summary <- apply(meanMatrix,2,mean,na.rm=T)
+		finalMatrix[ABC,] <- summary
+	}
+
+    if (!is.null(summarize)) finalMatrix <- apply(finalMatrix, 2, summarize)
+    return(finalMatrix)
+}
+
+
+
+.genMeanMatrix <- function(test,curWindowSize,sampleSize) {
+	meanMatrix <- matrix(data=NA,ncol=sampleSize,nrow=sampleSize)
+	start <- 1
+	end <- curWindowSize
+	meanCounter <- 1
+	while((meanCounter + curWindowSize - 1) <= sampleSize) {
+	   vec1 <- test[c(start:end)]
+	   m <- try(t.test(vec1))
+	   if (inherits(m,"try-error")) {
+	      m <- NA
+	   } else {
+	      m <- m$statistic
+	   }
+	   meanMatrix[meanCounter,c(meanCounter:(meanCounter+curWindowSize-1))] <- m
+	   start <- (start + 1)
+	   end <- (end + 1)
+	   meanCounter <- (meanCounter + 1)
+	}
+	return(meanMatrix)
+}
+
+
+
 
 movbin  <- function(v,span=NULL,summarize=mean) {
   if(is.null(span)){
@@ -203,8 +261,7 @@ naMean <- function(x) {
 }
 
 smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FALSE, 
-    aggrfun = absMax, method = c("movbin", "supsmu", "lowess"), 
-    ...) 
+    aggrfun = absMax, method = c("movbin", "supsmu", "lowess","movt"),...) 
 {
     
 	if (chrom == "ALL") {
@@ -267,7 +324,7 @@ smoothByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = FA
             y <- gx[nas, i]
             sm <- try(switch(method, movbin = try(movbin(y, ...)), 
                 supsmu = try(supsmu(x, y, ...)$y), lowess = try(lowess(x, 
-                  y, ...)$y)), silent = FALSE)
+                  y, ...)$y),movt = try(movt(y,...))), silent = FALSE)
             if (!inherits(sm, "try-error")) {
                 aa <- try(approx(x, sm, xout = locs), silent = TRUE)
                 if (!inherits(aa, "try-error")) {
