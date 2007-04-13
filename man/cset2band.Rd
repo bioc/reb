@@ -46,7 +46,7 @@ cset2band(exprs, genome, chr = "ALL", organism = NULL, FUN = isAbnormal, ...)
 
 ## Smooth the data using the default 'movbin' method,
 ## with the normal samples as reference and median centering
-   cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
+   cset <- reb(mcr.eset@exprs,vai.chr,ref=norms,center=TRUE)
 
 ## Mask the result to remove noise
    exprs <- cset[,-norms]

@@ -40,7 +40,7 @@ data(idiogramExample)
 	## Create a vector with the index of normal samples
 norms <- grep("MNC",colnames(mcr.eset@exprs))
 	## Smooth the data using the default 'movbin' method, with the normal samples as reference and median centering
-cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
+cset <- reb(mcr.eset@exprs,vai.chr,ref=norms,center=TRUE)
 	## Mask the cset to remove noise
 exprs <- cset[,-norms]
 exprs[abs(exprs) < 1.96] <- NA

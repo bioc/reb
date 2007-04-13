@@ -111,7 +111,7 @@ if(require(hu6800) && require(golubEsets)) {
    data("mcr.eset")
    data(idiogramExample)
    norms <- grep("MNC",colnames(mcr.eset@exprs))
-   bias <- cgma(mcr.eset,vai.chr,ref=norms)
+   bias <- cgma(mcr.eset@exprs,vai.chr,ref=norms)
    regmap(bias,col=topo.colors(50)) 
 }
 \keyword{manip}

@@ -9,7 +9,7 @@
 }
 \usage{
 reb(eset, genome, chrom = "ALL", ref = NULL, center = FALSE,
-aggrfun=absMax, method = c("movbin", "supsmu", "lowess"), ...)
+aggrfun=absMax, method = c("movbin", "supsmu", "lowess","movt"), ...)
 }
 \arguments{
   \item{eset}{ the expression set to analyze }
@@ -24,7 +24,7 @@ aggrfun=absMax, method = c("movbin", "supsmu", "lowess"), ...)
       maximum absolute value \code{absMax}. If NULL, all values are
       included.}
   \item{method}{ smoothing function to use - either \code{"supmu"},
-    \code{"lowess"} or \code{"movbin"}}
+    \code{"lowess"},  \code{"movbin"} or \code{"movt"}.}
   \item{\dots}{ additional paramaters to pass along to the smoothing function }
 }
 
@@ -95,7 +95,7 @@ norms <- grep("MNC",colnames(mcr.eset@exprs))
 ## Smooth the data using the default 'movbin' method,
 ## with the normal samples as reference
 
-cset <- reb(mcr.eset,vai.chr,ref=norms,center=TRUE)
+cset <- reb(mcr.eset@exprs,vai.chr,ref=norms,center=TRUE)
 
 ## Display the results with midiogram
 midiogram(cset@exprs[,-norms],vai.chr,method="i",dlim=c(-5,5),col=.rwb)

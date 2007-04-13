@@ -85,7 +85,7 @@ data(mcr.eset)
 data(idiogramExample)
 
 ref.ix <- grep("MNC",colnames(mcr.eset@exprs))
-mcr.sum <- summarizeByRegion(mcr.eset,vai.chr,ref=ref.ix)
+mcr.sum <- summarizeByRegion(mcr.eset@exprs,vai.chr,ref=ref.ix)
 @
 
 For one-color data (or more complex two-color data), the \Robject{ref} argument in the \Rfunction{summarizeByRegion} can be used to specify which sample(s) should be used as the reference sample(s).
@@ -116,7 +116,7 @@ The default smoothing function is a multiple span moving binomial test. Emperica
 Other functions such as \Rfunction{supsmu} and \Rfunction{lowess} can also be used.
 
 <<>>=
-mcr.cset <- smoothByRegion(mcr.eset,vai.chr,ref=ref.ix)
+mcr.cset <- smoothByRegion(mcr.eset@exprs,vai.chr,ref=ref.ix)
 @
 
 The \Rfunction{smoothByRegion} returns an \Robject{exprSet} object that contains the smoothed gene expression data.
