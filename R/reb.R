@@ -150,7 +150,7 @@ movt <- function(v,span=NULL,summarize=mean){
     }
     if (is.null(span))
         stop("Invalid window span")
-    v[is.na(v)] <- -999
+
 
    finalMatrix <- matrix(data=NA,nrow=length(span),ncol=length(v))
 
