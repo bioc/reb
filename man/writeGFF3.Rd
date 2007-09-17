@@ -42,10 +42,10 @@ MCR eset data was obtained with permission. See PMID: 15377468
 
 
 data(idiogramExample)
-ix <- abs(colo.eset@exprs) > .225
-colo.eset@exprs[ix] <- NA
-idiogram(colo.eset@exprs,ucsf.chr,"14",method="i",dlim=c(-1,1),col=.rwb)
-gffmat <- writeGFF3(colo.eset@exprs,ucsf.chr,"14",NULL)
+ix <- abs(colo.eset) > .225
+colo.eset[ix] <- NA
+idiogram(colo.eset,ucsf.chr,"14",method="i",dlim=c(-1,1),col=.rwb)
+gffmat <- writeGFF3(colo.eset,ucsf.chr,"14",NULL)
 gffmat[1:4,]
 
 }
