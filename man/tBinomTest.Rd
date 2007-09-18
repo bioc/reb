@@ -1,11 +1,11 @@
-\name{t.binom.test}
-\alias{t.binom.test}
+\name{tBinomTest}
+\alias{tBinomTest}
 \title{binomial t-test}
 \description{
   Binomial t-test
 }
 \usage{
-t.binom.test(x,trim=.1)
+tBinomTest(x,trim=.1)
 }
 \arguments{
   \item{x}{numeric argument}
@@ -16,6 +16,6 @@ t.binom.test(x,trim=.1)
 }
 \author{Karl A. Dykema and Kyle A. Furge}
 \examples{
-  cat("asdf")
+  cat("this is an example")
 }
 \keyword{ manip }

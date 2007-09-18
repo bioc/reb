@@ -1,7 +1,7 @@
 ##
 ## quick estimates 
 
-t.binom.test <- function(x,trim=0.1) {
+tBinomTest <- function(x,trim=0.1) {
   np <- sum(x > trim,na.rm=TRUE)
   nm <- sum(x < (-1*trim),na.rm=TRUE)
   N <- np + nm
