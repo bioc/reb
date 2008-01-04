@@ -52,76 +52,73 @@ regmap <- function(m,scale=c(-6,6),na.color=par("bg"),...) {
   par(op)
 }
 
-summarizeByRegion <- function (eset, genome, chrom = "ALL",ref = NULL, center = TRUE, aggrfun = NULL, p.value = 0.005, FUN = t.test, explode=FALSE ,...) 
+summarizeByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center = TRUE, aggrfun = NULL, p.value = 0.005, FUN = t.test, verbose = TRUE, explode = FALSE, ...) 
 {
-        if (chrom == "ALL") {
-            chrom <- names(attr(genome, "chromInfo"))
-            if (is.null(chrom) || is.na(chrom)) 
-                stop("chromLoc object does not contain any chromInfo\n")
-        }else if (chrom == "arms") {
-		chrom <- genome@chromLocs$armList
-	}else if (chrom == "bands") {
-		chrom <- genome@chromLocs$bandList
-	}else if (chrom == "mb") {
-		chrom <- genome@chromLocs$mbList
-	}
-	
-	if(class(eset) == "exprSet") {
-		exprs <- eset@exprs
-		.Deprecated(msg=Biobase:::EXPRSET_DEPR_MSG)
-	}else if(class(eset) == "ExpressionSet") exprs <- assayData(eset)$exprs
-	else exprs <- eset
-		
-    if (!is.null(ref)) {
-        if (!is.numeric(ref)) 
-            stop("column index's required")
+  if (chrom == "ALL") {
+    chrom <- names(attr(genome, "chromInfo"))
+    if (is.null(chrom) || is.na(chrom)) 
+      stop("chromLoc object does not contain any chromInfo\n")
+  }
+  else if (chrom == "arms") {
+    chrom <- genome@chromLocs$armList
+  }
+  else if (chrom == "bands") {
+    chrom <- genome@chromLocs$bandList
+  }
+  else if (chrom == "mb") {
+    chrom <- genome@chromLocs$mbList
+  }
+  if (class(eset) == "exprSet") {
+    exprs <- eset@exprs
+    .Deprecated(msg = Biobase:::EXPRSET_DEPR_MSG)
+  }
+  else if (class(eset) == "ExpressionSet") 
+    exprs <- assayData(eset)$exprs
+  else exprs <- eset
+  if (!is.null(ref)) {
+    if (!is.numeric(ref)) 
+      stop("column index's required")
+  }
+  if (!is.null(ref)) {
+    if(verbose) cat("Creating ratios...", "\n")
+    ref_mean <- apply(exprs[, ref], 1, mean, na.rm = TRUE)
+    exprs <- sweep(exprs, 1, ref_mean, "-")
+  }
+  if (center) 
+    exprs <- scale(exprs, scale = F)
+  chrom <- as.character(chrom)
+  sum.statistic <- matrix(NA,ncol=ncol(exprs),nrow=length(chrom))
+  rownames(sum.statistic) <- chrom
+  colnames(sum.statistic) <- colnames(exprs)
+  for (i in chrom) {
+    if(verbose) 
+      cat("Testing ",i,"\n")
+    ag.list <- .usedChromExprs(exprs, genome, i, aggrfun)
+    if (is.null(ag.list))
+      next
+    region.gx <- ag.list$exprs
+    stat <- try(apply(region.gx, 2, FUN, ...), silent = !verbose)
+    if (inherits(stat, "try-error"))
+      next
+    if (is.list(stat)) {
+      ps <- unlist(lapply(stat, function(x) x$p.value))
+      stat <- unlist(lapply(stat, function(x) x$statistic))
+      if (!is.na(p.value)) {
+        stat[ps > p.value] <- NA
+      }
     }
-    if (!is.null(ref)) {
-        cat("Creating ratios...", "\n")
-        ref_mean <- apply(exprs[, ref], 1, mean, na.rm = TRUE)
-        exprs <- sweep(exprs, 1, ref_mean, "-")
-    }
-    if (center) 
-        exprs <- scale(exprs, scale = F)
-    #blank <- rep(NA, length = length(sampleNames(eset)))
-    blank <- rep(NA, length = length(colnames(exprs)))
-    sum.statistic <- vector()
-    for (i in chrom) {
-        ag.list <- .usedChromExprs(exprs, genome, i, aggrfun)
-        if (is.null(ag.list)) {
-            sum.statistic <- rbind(sum.statistic, blank)
-            next
-        }
-        region.gx <- ag.list$exprs
-        stat <- try(apply(region.gx, 2, FUN, ...),silent=T)
-        if (inherits(stat, "try-error")) {
-            sum.statistic <- rbind(sum.statistic, blank)
-            next
-        }
-        if (is.list(stat)) {
-            ps <- unlist(lapply(stat, function(x) x$p.value))
-            stat <- unlist(lapply(stat, function(x) x$statistic))
-            if (!is.na(p.value)) {
-                stat[ps > p.value] <- NA
-            }
-        }
-        sum.statistic <- rbind(sum.statistic, stat)
-    }
-    rownames(sum.statistic) <- as.character(chrom)
-    #colnames(sum.statistic) <- sampleNames(eset)
-    colnames(sum.statistic) <- colnames(exprs)
-    
-    if(explode){
-	nExprs <- exprs
-	nExprs[1:nrow(nExprs),1:ncol(nExprs)] <- NA
-	
-	cat("Exploding summary matrix...", "\n")
-	for(i in chrom) 
-		for(j in 1:ncol(exprs)) nExprs[.usedChromExprs(exprs,genome,i)$geneIDs,j] <- sum.statistic[i,j]
-	return(nExprs)
-    }
-   
-   return(sum.statistic)
+    sum.statistic[i,] <- stat
+  }
+  if (explode) {
+    nExprs <- exprs
+    nExprs[1:nrow(nExprs), 1:ncol(nExprs)] <- NA
+    if (verbose)
+      cat("Exploding summary matrix...", "\n")
+    for (i in chrom) for (j in 1:ncol(exprs)) nExprs[.usedChromExprs(exprs, 
+                                                                     genome, i)$geneIDs, j] <- sum.statistic[i, j]
+    return(nExprs)
+  }
+  return(sum.statistic)
 }
 
 cgma <- summarizeByRegion
