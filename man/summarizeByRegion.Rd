@@ -7,12 +7,12 @@ Splits the data into subsets based on genome mapping information,
 computes summary statistics for each region, and returns the results in
 a convenient form. (cgma stands for Comparative Genomic Microarray Analysis)
 
-This function supplies a t.test function at the emperically derived significance
+This function supplies a t.test function at the empirically derived significance
 threshold (p.value = 0.005)
 }
 
 \usage{
-cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, explode=FALSE ,...) 
+cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005, FUN=t.test, verbose=TRUE, explode=FALSE ,...) 
 }
 \arguments{
   \item{eset}{an exprSet object}
@@ -26,6 +26,7 @@ cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005,
       included. Also see \code{absMax}}
   \item{p.value}{p.value cutoff or NA}
   \item{FUN}{ function by which to summarize the data}
+  \item{verbose}{boolean - print verbose output during execution?}
   \item{explode}{boolean - explode summary matrix into a full expression set?}
   \item{\dots}{further arguments pass to or used by the function}
 }
@@ -42,7 +43,7 @@ regional gene expression biases when comparing a test sample to a
 reference sample. For example, a number of simple tests can be used to
 determine if a genomic region contains a disproportionate number of
 positive or negative log transformed gene expression ratios. The
-presence of such a regional expression bias can indicates an underlaying
+presence of such a regional expression bias can indicates an underlying
 genomic abnormality.
 
 If multiple clones map to the same genomic locus the aggregate.by.loc
@@ -60,10 +61,7 @@ can also be used if you set the "explode" argument to TRUE.
 which the genes can be divided a number of different ways. Separating the data by chromosome 
 arm was the original intent. If you use \code{\link[idiogram]{buildChromLocation.2}} 
 with the "arms" argument to build your chromLocation object, set the "chrom" argument 
-to "arms" in this function. 
-
-
-
+to "arms" in this function.
 }
 \value{
   \item{m}{A matrix of summary statistics}
