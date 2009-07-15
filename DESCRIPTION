@@ -7,4 +7,4 @@ Description: A set of functions to dentify regional expression biases
 Maintainer: Karl J. Dykema <karl.dykema@vai.org>
 License: VAI, Free for non-commercial, academic use. 
 ZipData: no
-biocViews: Microarray, DNACopyNumber, Visualization
+biocViews: Microarray, CopyNumberVariants, Visualization
