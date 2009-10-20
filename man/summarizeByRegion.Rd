@@ -24,7 +24,7 @@ cgma(eset, genome, chrom="ALL",ref=NULL,center=TRUE,aggrfun=NULL, p.value=0.005,
    \item{aggrfun}{ a function to summarizes/aggregates gene
       expression values that map to the same locations. If NULL, all values are
       included. Also see \code{absMax}}
-  \item{p.value}{p.value cutoff or NA}
+  \item{p.value}{p.value cutoff, NA for all results, or TRUE for all t.stats and p.values}
   \item{FUN}{ function by which to summarize the data}
   \item{verbose}{boolean - print verbose output during execution?}
   \item{explode}{boolean - explode summary matrix into a full expression set?}

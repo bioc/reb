@@ -90,6 +90,10 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center =
   sum.statistic <- matrix(NA,ncol=ncol(exprs),nrow=length(chrom))
   rownames(sum.statistic) <- chrom
   colnames(sum.statistic) <- colnames(exprs)
+  sum.pvalue <- matrix(NA,ncol=ncol(exprs),nrow=length(chrom))
+  rownames(sum.pvalue) <- chrom
+  colnames(sum.pvalue) <- colnames(exprs)
+
   for (i in chrom) {
     if(verbose) 
       cat("Testing ",i,"\n")
@@ -103,11 +107,12 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center =
     if (is.list(stat)) {
       ps <- unlist(lapply(stat, function(x) x$p.value))
       stat <- unlist(lapply(stat, function(x) x$statistic))
-      if (!is.na(p.value)) {
+      if (!is.na(p.value) & !is.logical(p.value)) {
         stat[ps > p.value] <- NA
       }
     }
     sum.statistic[i,] <- stat
+    sum.pvalue[i,] <- ps
   }
   if (explode) {
     nExprs <- exprs
@@ -118,7 +123,8 @@ summarizeByRegion <- function (eset, genome, chrom = "ALL", ref = NULL, center =
                                                                      genome, i)$geneIDs, j] <- sum.statistic[i, j]
     return(nExprs)
   }
-  return(sum.statistic)
+  if(is.logical(p.value)) return(list(results=sum.statistic,p.value=sum.pvalue))
+    else return(sum.statistic)
 }
 
 cgma <- summarizeByRegion
