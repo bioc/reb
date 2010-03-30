@@ -42,7 +42,7 @@ movbin(v,span=NULL,summarize=mean)
 }
 
 \author{ Kyle A. Furge, Ph.D., \email{kyle.furge@vai.org} and Karl J. Dykema, \email{karl.dykema@vai.org}}
-\note{}
+
 
 \examples{
 x <- c(rnorm(50,mean=1),rnorm(50,mean=-1),rnorm(100))

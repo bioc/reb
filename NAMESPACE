@@ -1,4 +1,3 @@
 useDynLib(reb)
 exportPattern("^[^\\.]")
-importFrom(idiogram, .usedChromExprs,.rwb,idiogram)
 import(Biobase,idiogram)

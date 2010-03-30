@@ -14,9 +14,6 @@ isAbnormal(x, percent = 0.5)
 \details{
   This simple function is used by \code{cset2band}. 
 }
-\value{
-  
-}
 
 \author{ Karl Dykema  }
 

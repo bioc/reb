@@ -68,7 +68,7 @@ to "arms" in this function.
 }
 \references{Crawley and Furge, Genome Biol. 2002;3(12):RESEARCH0075. Epub 2002 Nov 25. }
 \author{Kyle A. Furge}
-\note{}
+
 
 \seealso{\code{\link{buildChromMap}},\code{\link{tBinomTest}},\code{\link{regmap}},\code{\link[idiogram]{buildChromLocation.2}}}
 \examples{

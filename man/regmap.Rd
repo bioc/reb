@@ -24,11 +24,9 @@ potion of the graph.
 For other colors consider using the geneplotter (dChip.colors) or marrayPlots
 (maPalette) library functions (i.e. regmap(m, col=dChipColors(50)))
 }
-\value{
-}
-\references{}
+
 \author{Kyle A. Furge}
-\note{}
+
 
 \seealso{\code{\link{image}},\code{\link{summarizeByRegion}}}
 \examples{
