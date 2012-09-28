@@ -73,6 +73,7 @@ to "arms" in this function.
 \seealso{\code{\link{buildChromMap}},\code{\link{tBinomTest}},\code{\link{regmap}},\code{\link[idiogram]{buildChromLocation.2}}}
 \examples{
 
+\dontrun{
 ## 
 ## NOTE: This requires an annotation package to work.
 ##       In this example packages "hu6800" and "golubEsets" are used.
@@ -111,5 +112,7 @@ if(require(hu6800) && require(golubEsets)) {
    norms <- grep("MNC",colnames(mcr.eset@exprs))
    bias <- cgma(mcr.eset@exprs,vai.chr,ref=norms)
    regmap(bias,col=topo.colors(50)) 
+}
+
 }
 \keyword{manip}

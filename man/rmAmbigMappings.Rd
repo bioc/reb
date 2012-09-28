@@ -29,16 +29,20 @@ rmAmbigMappings(cL)
 
 \examples{
 
-if (require(hu6800)) {
+## 
+## NOTE: This requires an annotation package to work, it is provided for info only.
+## 
 
-  library(Biobase)
-  library(annotate)
+#if (require(hu6800)) {
+
+#  library(Biobase)
+#  library(annotate)
 
   ## Build a specific chrom arm
 
-  cL <- buildChromLocation("hu6800")
-  cleanCL <- rmAmbigMappings(cL)
-}
+#  cL <- buildChromLocation("hu6800")
+#  cleanCL <- rmAmbigMappings(cL)
+#}
 }
 
 \keyword{ manip }

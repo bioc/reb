@@ -33,22 +33,22 @@ A 'chromLocation' object representing the specified genomic regions and annotati
 
 \examples{
 ## 
-## NOTE: This requires an annotation package to work.
-##       In this example it is hu6800
-## 
-if (require(hu6800)) {
+## NOTE: This requires an annotation package to work, it is provided for info only.
+##       
 
-  library(Biobase)
-  library(annotate)
+#if (require(hu6800)) {
+
+#  library(Biobase)
+#  library(annotate)
 
   ## Build a specific chrom arm
 
-  chr1q <- buildChromMap("hu6800",c("1q1","1q2","1q3","1q4"))
+#  chr1q <- buildChromMap("hu6800",c("1q1","1q2","1q3","1q4"))
 
   ## Build human data based on chrom arms
 
-  data(Hs.arms) 
-  map <- buildChromMap("hu6800",Hs.arms)
-}
+#  data(Hs.arms) 
+#  map <- buildChromMap("hu6800",Hs.arms)
+#}
 }
 \keyword{manip}
